@@ -1,0 +1,24 @@
+{
+  "name": "hametuha/HamePub",
+  "description": "PHP Library to handle ePub 3.0",
+  "type": "library",
+  "keywords": ["WordPress", "ePub"],
+  "homepage": "https://github.com/hametuha/HamePub",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Takahashi Fumiki",
+      "email": "takahashi.fumiki@hametuha.co.jp"
+    }
+  ],
+  "require": {
+    "php": ">=5.4",
+    "mustangostang/spyc": "*",
+    "phpunit/phpunit": "4.4.*"
+  },
+  "autoload": {
+    "psr-0": {
+      "Hametuha\\HamePub": "src/"
+    }
+  }
+}
