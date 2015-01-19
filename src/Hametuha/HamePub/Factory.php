@@ -5,12 +5,15 @@ namespace Hametuha\HamePub;
 
 use Hametuha\HamePub\Exception\EnvironmentException;
 use Hametuha\HamePub\Exception\SettingException;
-
+use Hametuha\HamePub\File\Distributor;
+use Hametuha\HamePub\MetaInf\Container;
 
 /**
  * Factory class
  *
  * @package Hametuha\HamePub
+ * @property-read Container $container
+ * @property-read Distributor $distributor
  */
 class Factory
 {
@@ -58,6 +61,13 @@ class Factory
 	 */
 	public function __get($name){
 		switch( $name ){
+			case 'container':
+				$class_name = ucfirst($name);
+				return $class_name::get($this->id);
+				break;
+			case 'distributor':
+				return Distributor::get($this->id);
+				break;
 			default:
 				return null;
 				break;

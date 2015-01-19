@@ -3,7 +3,7 @@
 namespace Hametuha\HamePub\Pattern;
 
 
-use Hametuha\HamePub\Distributor;
+use Hametuha\HamePub\File\Distributor;
 
 /**
  * Application Class
@@ -17,7 +17,7 @@ abstract class Application
 	/**
 	 * @var array
 	 */
-	private static $instances = [];
+	protected static $instances = [];
 
 	/**
 	 * @var string

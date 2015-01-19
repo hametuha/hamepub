@@ -3,11 +3,11 @@
 namespace Hametuha\HamePub\Exception;
 
 /**
- * Environment is wrong
+ * Occurs on failing compilation
  *
  * @package Hametuha\HamePub\Exception
  */
-class EnvironmentException extends \Exception
+class CompileException extends \Exception
 {
 
 	protected $code = 500;

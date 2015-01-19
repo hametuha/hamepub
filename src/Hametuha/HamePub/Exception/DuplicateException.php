@@ -3,11 +3,11 @@
 namespace Hametuha\HamePub\Exception;
 
 /**
- * Environment is wrong
+ * Duplicate
  *
  * @package Hametuha\HamePub\Exception
  */
-class EnvironmentException extends \Exception
+class DuplicateException extends \Exception
 {
 
 	protected $code = 500;

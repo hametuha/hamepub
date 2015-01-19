@@ -1,6 +1,6 @@
 <?php
 
-namespace Hametuha\HamePub;
+namespace Hametuha\HamePub\File;
 
 
 use Hametuha\HamePub\Pattern\Singleton;
@@ -25,7 +25,7 @@ class Path extends Singleton
 	public function __get($name){
 		switch( $name ){
 			case 'assets':
-				return __DIR__.DIRECTORY_SEPARATOR.'assets';
+				return dirname(__DIR__).DIRECTORY_SEPARATOR.'assets';
 				break;
 			case 'skeleton':
 				return $this->assets.DIRECTORY_SEPARATOR.'skeleton.epub';

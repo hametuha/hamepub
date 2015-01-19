@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<package xmlns="http://www.idpf.org/2007/opf" unique-identifier="book-id" version="3.0">
+  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <dc:identifier id="book-id">http://hametuha.com</dc:identifier>
+    <dc:language>en_US</dc:language>
+    <dc:title>ePub by Hametuha</dc:title>
+    <dc:creator id="creator">Takahashi Fumiki</dc:creator>
+    <meta refines="#creator" property="role" scheme="marc:relators" id="role">aut</meta>
+  </metadata>
+  <manifest>
+    <item id="nav.xhtml"
+          href="Documents/nav.xhtml"
+          properties="nav"
+          media-type="application/xhtml+xml"/>
+    <item id="chapter1.xhtml"
+          href="Documents/chapter1.xhtml"
+          media-type="application/xhtml+xml"/>
+    <item id="fig2.jpg"
+          href="Images/images/fig2.jpg"
+          media-type="image/jpeg"/>
+  </manifest>
+  <spine toc="ncx"></spine>
+</package>
