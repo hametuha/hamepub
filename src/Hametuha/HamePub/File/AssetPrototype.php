@@ -23,12 +23,12 @@ abstract class AssetPrototype
 	protected $directory = '';
 
 	/**
-	 *
+	 * Copy file
 	 *
 	 * @param string $id
 	 * @param string $src
 	 * @param string $dist_name
-	 * @return string item's ID
+	 * @return string item's relative path
 	 *
 	 * @throws DuplicateException
 	 * @throws CompileException
@@ -49,9 +49,10 @@ abstract class AssetPrototype
 		static::$ids[$id][] = $dist_name;
 		$distributor = Distributor::get($id);
 		// Move file
-		$distributor->copy($src, $this->directory.DIRECTORY_SEPARATOR.$dist_name);
+		$rel_path = $this->directory.DIRECTORY_SEPARATOR.$dist_name;
+		$distributor->copy($src, $rel_path);
 		// Return ID
-		return $dist_name;
+		return $rel_path;
 	}
 
 
