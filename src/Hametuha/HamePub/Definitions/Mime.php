@@ -82,7 +82,7 @@ class Mime extends Prototype {
 	/**
 	 * Scripts
 	 */
-	const RFC4329 = 'text/javascript';
+	const JS = 'text/javascript';
 
 	/**
 	 * Get extension from file path
@@ -108,13 +108,41 @@ class Mime extends Prototype {
 				return self::MediaOverlays301;
 				break;
 			case 'js':
-				return self::RFC4329;
+				return self::JS;
 				break;
 			default:
 				$const_name = strtoupper($ext);
 				$refl = new \ReflectionClass(get_called_class());
 				return $refl->getConstant($const_name);
 				break;
+		}
+	}
+
+	/**
+	 * Return folder name
+	 *
+	 * @param string $path
+	 *
+	 * @return string
+	 */
+	public static function getDestinationFolder($path){
+		$path = (string) $path;
+		if( preg_match('/\.(jpe?g|gif|png|svg)$/i', $path) ) {
+			return 'Image';
+		}elseif( preg_match('/\.(otf|woff|ttf)$/i', $path) ) {
+			return 'Font';
+		}elseif( preg_match('/\.(css)$/i', $path) ) {
+			return 'CSS';
+		}elseif( preg_match('/\.(mp4|mp3)$/i', $path) ){
+			return 'Media';
+		}elseif( preg_match('/\.(smil|pls)$/i', $path) ){
+			return 'Speech';
+		}elseif( preg_match('/\.(js|json)$/i', $path) ){
+			return 'JS';
+		}elseif( preg_match('/\.xhtml)$/i', $path) ){
+			return 'XHTML';
+		}else{
+			return 'Misc';
 		}
 	}
 
