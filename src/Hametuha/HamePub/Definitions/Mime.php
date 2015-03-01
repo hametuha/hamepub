@@ -139,8 +139,8 @@ class Mime extends Prototype {
 			return 'Speech';
 		}elseif( preg_match('/\.(js|json)$/i', $path) ){
 			return 'JS';
-		}elseif( preg_match('/\.xhtml)$/i', $path) ){
-			return 'XHTML';
+		}elseif( preg_match('/\.x?html$/i', $path) ){
+			return 'Text';
 		}else{
 			return 'Misc';
 		}

@@ -3,75 +3,101 @@
 namespace Hametuha\HamePub;
 
 
-use Hametuha\HamePub\Exception\EnvironmentException;
-use Hametuha\HamePub\Exception\SettingException;
+use Hametuha\HamePub\Pattern\AbstractFactory;
 use Hametuha\HamePub\File\Distributor;
 use Hametuha\HamePub\MetaInf\Container;
+use Hametuha\HamePub\Parser\HTML5Parser;
 
 /**
  * Factory class
  *
  * @package Hametuha\HamePub
- * @property-read Container $container
- * @property-read Distributor $distributor
  */
-class Factory
+class Factory extends AbstractFactory
 {
 
 	/**
 	 * @var array
 	 */
-	private static $ids = [];
+	public $doms = [];
 
 	/**
-	 * @var string
-	 */
-	private $id = '';
-
-	/**
-	 * Constructor
+	 * Register HTML string
 	 *
 	 * @param string $id
-	 * @param string $temp_dir
-	 *
-	 * @throws EnvironmentException
-	 * @throws SettingException
+	 * @param string $html
+	 * @param string $linear
+	 * @param array $properties
+	 * @return false|\DOMDocument
 	 */
-	public function __construct($id, $temp_dir = ''){
-		if( false !== array_search($id, self::$ids) ){
-			throw new SettingException(sprintf('ID %s has already been initialized and is not unique.', $id));
+	public function registerHTML($id, $html, $linear = 'yes', array $properties = []){
+		$dom = $this->parser->parseFromString($html);
+		if( $dom ){
+			$this->doms[$id] = $dom;
+			$this->opf->addIdref($id.'.xhtml', $linear, $properties);
+			return $dom;
 		}
-		if( !preg_match('/\A[a-zA-Z0-9\-_\.]+\z/', $id) ){
-			throw new SettingException(sprintf('ID %s should be ready for directory name.', $id));
+		return false;
+	}
+
+
+	/**
+	 * Load from path
+	 *
+	 * @param string $path
+	 * @param array $args
+	 * @param string $linear
+	 * @param array $properties
+	 * @return \DomDocument|false
+	 */
+	public function includeTemplate($id, $path, array $args = [], $linear = 'yes', array $properties = []){
+		if( !file_exists($path) ){
+			return false;
 		}
-		$this->id = $id;
-		self::$ids[] = $id;
-		Distributor::get($id, $temp_dir);
-		// Check ZipArchive
-		if( !class_exists('ZipArchive') ){
-			throw new EnvironmentException('Class ZipArchive doesn\'t exist.');
+		if( !empty($args) ){
+			extract($args);
 		}
+		ob_start();
+		include $path;
+		$content = ob_get_contents();
+		ob_end_clean();
+		return $this->registerHTML($id, $content, $linear, $properties);
 	}
 
 	/**
-	 * @param string $name
+	 * Register HTML from file path
 	 *
-	 * @return mixed|null
-	 * @throws SettingException
+	 * @param string $id
+	 * @param string $path
+	 *
+	 * @return bool
 	 */
-	public function __get($name){
-		switch( $name ){
-			case 'container':
-				$class_name = ucfirst($name);
-				return $class_name::get($this->id);
-				break;
-			case 'distributor':
-				return Distributor::get($this->id);
-				break;
-			default:
-				return null;
-				break;
+	public function registerFromPath($id, $path){
+		if( !file_exists($path) ){
+			return false;
 		}
+		$dom = $this->parser->parseFromString(file_get_contents($path));
+		if( $dom ){
+			$this->doms[$id] = $dom;
+		}
+		return false;
+	}
+
+	/**
+	 * Get remote file
+	 *
+	 * @param string $id
+	 * @param string $url
+	 * @param array $context
+	 *
+	 * @return bool
+	 */
+	public function registerFromUrl($id, $url, array $context = []){
+		$response = $this->parser->getRemoteFile($url, $context);
+		if( $response && ($dom = $this->parser->parseFromString($response)) ){
+			$this->doms[$id] = $dom;
+		}
+		return false;
 	}
 
 }

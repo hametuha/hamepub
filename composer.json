@@ -2,6 +2,7 @@
   "name": "hametuha/HamePub",
   "description": "PHP Library to handle ePub 3.0",
   "type": "library",
+  "version": "1.0.0",
   "keywords": ["WordPress", "ePub"],
   "homepage": "https://github.com/hametuha/HamePub",
   "license": "MIT",

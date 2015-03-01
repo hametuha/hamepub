@@ -20,7 +20,7 @@ class Distributor
 	/**
 	 * @var array
 	 */
-	private static $instances = [];
+	protected static $instances = [];
 
 	/**
 	 * @var string

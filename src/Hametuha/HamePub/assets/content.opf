@@ -5,5 +5,5 @@
     <dc:language>ja</dc:language>
   </metadata>
   <manifest></manifest>
-  <spine toc="ncx"></spine>
+  <spine page-progression-direction="default"></spine>
 </package>

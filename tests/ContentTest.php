@@ -41,9 +41,9 @@ class ContentTest extends Hametuha\HamePub\Test
 			'id' => 'role',
 		]);
 		// Add items
-		$this->content->addItem('nav.xhtml', 'Documents/nav.xhtml', ['nav']);
-		$this->content->addItem('chapter1.xhtml', 'Documents/chapter1.xhtml');
-		$this->content->addItem('fig2.jpg', 'Images/images/fig2.jpg');
+		$this->content->addItem('Documents/nav.xhtml', 'nav.xhtml', ['nav']);
+		$this->content->addItem('Documents/chapter1.xhtml', 'chapter1.xhtml');
+		$this->content->addItem('Images/images/fig2.jpg', 'fig2.jpg');
 		// Check file is output
 		$out = $this->content->putXML();
 		$this->assertFileExists($out);

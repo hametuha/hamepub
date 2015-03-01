@@ -17,7 +17,7 @@ abstract class Application
 	/**
 	 * @var array
 	 */
-	protected static $instances = [];
+	private static $instances = [];
 
 	/**
 	 * @var string
@@ -34,6 +34,22 @@ abstract class Application
 	}
 
 	/**
+	 * Get remote file
+	 *
+	 * @param string $url
+	 * @param array $context
+	 *
+	 * @return string|false
+	 */
+	public function getRemoteFile($url, array $context = []){
+		return @file_get_contents($url, false, stream_context_create(array_merge([
+			'http' => [
+				'timeout' => 10,
+			]
+		], $context)));
+	}
+
+	/**
 	 * Get instance
 	 *
 	 * @param string $id
@@ -41,10 +57,14 @@ abstract class Application
 	 * @return static
 	 */
 	public static function get($id){
-		if( !isset(static::$instances[$id]) ){
-			static::$instances[$id] = new static($id);
+		$class_name = get_called_class();
+		if( !isset(self::$instances[$class_name]) ){
+			self::$instances[$class_name] = [];
 		}
-		return static::$instances[$id];
+		if( !isset(self::$instances[$class_name][$id]) ){
+			self::$instances[$class_name][$id] = new $class_name($id);
+		}
+		return self::$instances[$class_name][$id];
 	}
 
 	/**

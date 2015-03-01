@@ -29,7 +29,7 @@ class DistributorTest extends \Hametuha\HamePub\Test
 		$vlah = 'Vlah, Vlah, Vlah';
 		$written = $this->distributor->write($vlah, 'trash'.DIRECTORY_SEPARATOR.'written.txt');
 		// Check existence
-		$this->assertFileExists($written, 'File isn\'t written peoperly.');
+		$this->assertFileExists($written, 'File isn\'t written properly.');
 		// Check contents
 		$this->assertEquals($vlah, file_get_contents($written), 'File contents aren\'t same.');
 		//
@@ -38,11 +38,6 @@ class DistributorTest extends \Hametuha\HamePub\Test
 		$epub = $this->tmp_dir.DIRECTORY_SEPARATOR."{$this->id}.epub";
 		$this->distributor->compile($epub);
 		$this->assertFileExists($epub);
-
-	}
-
-	public function testFail(){
-		$this->assertTrue(false);
 	}
 
 }
