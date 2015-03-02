@@ -55,8 +55,9 @@ class Toc
 	 *
 	 * @param string $label
 	 * @param string $link
+	 * @param int $index
 	 */
-	public function addChild($label, $link){
+	public function addChild($label, $link, $index = -1){
 		$this->children[$label] = new Toc($label, $link);
 	}
 

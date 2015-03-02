@@ -100,4 +100,20 @@ class Factory extends AbstractFactory
 		return false;
 	}
 
+	/**
+	 * Add Cover image
+	 *
+	 * @param string $src
+	 * @param string $dest
+	 * @param string $id
+	 */
+	public function addCover($src, $dest = '', $id = 'cover'){
+		if( file_exists($src) ){
+			if( !$dest ){
+				$dest = 'Image'.DIRECTORY_SEPARATOR.basename($src);
+			}
+			$this->distributor->copy($src, $dest);
+			$this->opf->addItem($dest, $id, ['cover-image']);
+		}
+	}
 }
