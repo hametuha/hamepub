@@ -6,7 +6,11 @@ namespace Hametuha\HamePub\Oebps;
 use Hametuha\HamePub\Pattern\Application;
 
 
-
+/**
+ * Toc generator
+ *
+ * @package Hametuha\HamePub\Oebps
+ */
 class Toc
 {
 
@@ -152,5 +156,14 @@ HTML;
 			self::$instances[$id] = new Toc($label, '', true);
 		}
 		return self::$instances[$id];
+	}
+
+	/**
+	 * Get toc length
+	 *
+	 * @return int
+	 */
+	public function length(){
+		return count($this->children);
 	}
 }

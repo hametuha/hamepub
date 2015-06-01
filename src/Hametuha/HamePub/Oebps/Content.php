@@ -29,7 +29,7 @@ class Content extends Prototype
 	 */
 	public function setIdentifier($urn){
 		$identifier = $this->dom->metadata->children('dc', true)->identifier[0];
-		$identifier[0] = $this->h($urn);
+		$identifier[0] = $urn;
 		return $identifier->attributes()->id;
 	}
 
@@ -108,8 +108,18 @@ class Content extends Prototype
 	 * @return string
 	 */
 	public function addItem($relative_path, $id = '', array $properties = []){
+		$id = $id ?: $this->pathToId($relative_path);
+		// Avoid duplication
+		foreach( $this->dom->manifest->item as $item ){
+			/** @var \SimpleXMLElement $item */
+			$attr = $item->attributes();
+			if( isset($attr['id']) && $id == $attr['id'] ){
+				return $id;
+			}
+		}
+		// This is unique.
 		$item = $this->dom->manifest->addChild('item');
-		$item['id'] = $id ?: $this->pathToId($relative_path);
+		$item['id'] = $id;
 		$item['href'] = $relative_path;
 		$item['media-type'] = Mime::getTypeFromPath($relative_path);
 		if( $properties ){

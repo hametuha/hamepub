@@ -112,8 +112,12 @@ class Factory extends AbstractFactory
 			if( !$dest ){
 				$dest = 'Image'.DIRECTORY_SEPARATOR.basename($src);
 			}
-			$this->distributor->copy($src, $dest);
+			$this->distributor->copy($src, 'OEBPS'.DIRECTORY_SEPARATOR.$dest);
 			$this->opf->addItem($dest, $id, ['cover-image']);
+			$this->opf->addMeta('meta', '', [
+				'name' => 'cover',
+				'content' => $id
+			]);
 		}
 	}
 }

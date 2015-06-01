@@ -41,7 +41,17 @@ class HTML5Parser extends Application
 		$html = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>'."\n".$html;
 		// Library HTML5 always drop xmlns.
 		$html = str_replace('<html', '<html xmlns="http://www.w3.org/1999/xhtml"', $html);
-		return preg_replace('/<(meta|link|img)([^>]+)>/u', '<$1$2 />', $html);
+		// Convert entities
+		$html = str_replace('&nbsp;', '&#160;', $html);
+		// Remove srcset
+		$html = preg_replace('/srcset="[^"]*"/', '', $html);
+		// Remove rt
+		$html = preg_replace('/<rp>[^<]*?<\/rp>/', '', $html);
+		// Remove align
+		$html = preg_replace('/align="(center|right|left)"/', 'class="text-$1"', $html);
+		// fix close tag
+		$html = preg_replace('/<(meta|link|img|br|param|hr)([^>]*)?>/u', '<$1$2 />', $html);
+		return $html;
 	}
 
 	/**
@@ -62,7 +72,7 @@ class HTML5Parser extends Application
 	 * @param \DomDocument $dom
 	 * @param string $tag
 	 * @param string $attr
-	 * @param string $url_base
+	 * @param string $url_base URL base to be replaced with $doc_root
 	 * @param string $doc_root
 	 * @return array
 	 */
@@ -71,18 +81,173 @@ class HTML5Parser extends Application
 		foreach( $dom->getElementsByTagName($tag) as $elem ){
 			list($value) = explode('?', $elem->getAttribute($attr));
 			if( false !== strpos($value, $url_base) ){
-				$path = str_replace($url_base, $doc_root, $value);
+				$path = preg_replace($url_base, $doc_root, $value);
 				if( file_exists($path) ){
-					$dir = 'Asset';
+					$dir = 'Asset/';
 					$new_path = ltrim(str_replace($doc_root, $dir, $path), DIRECTORY_SEPARATOR);
 					$elem->setAttribute($attr, '../'.$new_path);
-					if( $this->distributor->copy($path, 'OEBPS/'.$new_path) ){
-						$paths[] = $new_path;
+					// If this is CSS, extract assets
+					if( false !== strpos($path, '.css') ){
+						// Load all url context and copy them
+						$css = preg_replace_callback('/url\w*?\(([^)]*)\)/', function($matches) use ($path, $doc_root, $dir, &$paths){
+							list($asset) = explode('?', ltrim(trim(trim($matches[1]), '"'), '/'));
+							$asset = realpath(dirname($path).DIRECTORY_SEPARATOR.$asset);
+							if( file_exists($asset) ){
+								$asset_src = str_replace($doc_root, $dir, $asset);
+								if( $this->distributor->copy($asset, 'OEBPS/'.$asset_src) ){
+									$paths[] = $asset_src;
+								}
+							}
+							return $matches[0];
+						}, file_get_contents($path));
+						// Save CSS
+						if( $this->distributor->write($css, 'OEBPS/'.$new_path) ){
+							$paths[] = $new_path;
+						}
+					}else{
+						// Copy it
+						if( $this->distributor->copy($path, 'OEBPS/'.$new_path) ){
+							$paths[] = $new_path;
+						}
 					}
 				}
 			}
 		}
 		return $paths;
+	}
+
+	/**
+	 * Extract remote assets and save it
+	 *
+	 * @param \DomDocument $dom
+	 *
+	 * @return array
+	 */
+	public function pullRemoteAssets(\DomDocument &$dom){
+		$paths = [];
+		foreach(['img' => 'src', 'script' => 'src', 'link' => 'href'] as $tag => $attr){
+			foreach( $dom->getElementsByTagName($tag) as $elem ){
+				$url = $elem->getAttribute($attr);
+				if( !preg_match('/^(https?:)?\/\//', $url) ){
+					continue;
+				}
+				// Get remote resource
+				if( !($resource = $this->getRemote($url)) ){
+					continue;
+				}
+				// Let's detect file mime
+				list($basename) = explode('?', basename($url));
+				$dir = Mime::getDestinationFolder($basename);
+				if( 'Misc' === $dir ){
+					// Oh, it might not have extension...
+					if( $resource['info'] ){
+						list($mime, $type) = explode('/', $resource['info']['content_type']);
+						list($ext) = explode(';', $type);
+						$new_dir = Mime::getDestinationFolder("hoge.{$ext}");
+						if( $new_dir != $dir ){
+							$dir = $new_dir;
+							$basename = "{$basename}.{$ext}";
+						}
+					}
+				}
+				// O.K.
+				$new_path = $dir.'/'.$basename;
+				$elem->setAttribute($attr, '../'.$new_path);
+				if( $this->distributor->write($resource['body'], 'OEBPS/'.$new_path) ){
+					$paths[] = $new_path;
+				}
+			}
+		}
+		return $paths;
+	}
+
+	/**
+	 * Convert xml
+	 *
+	 * @param string $content
+	 *
+	 * @return mixed
+	 */
+	public function format($content){
+		// Add tcy
+		$content = preg_replace_callback('#(?<=>|^|[^[:ascii:]])([0-9a-zA-Z!?]{1,3})(?![[:ascii:]])#u', function($matches){
+			return sprintf('<span class="tcy">%s</span>', $matches[1]);
+		}, $content);
+
+		// Convert DOM
+		$xml = <<<HTML
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+</head>
+<body>
+{$content}
+</body>
+</html>
+HTML;
+		// Add auto indent
+		$dom = $this->html5->loadHTML($xml);
+		foreach( $dom->getElementsByTagName('p') as $p ){
+			if( !$this->need_indent($p->nodeValue) ){
+				$this->add_class($p, 'no-indent');
+			}
+		}
+		preg_match('/<body>(.*)<\/body>/s', $this->html5->saveHTML($dom), $match);
+		return $match[1];
+	}
+
+	/**
+	 * Detect if auto-indent required
+	 *
+	 * @param string $string
+	 * @return bool
+	 */
+	public function need_indent($string){
+		$first_letter = mb_substr($string, 0, 1, 'UTF-8');
+		$match = !preg_match('/[ 　【《〔〝『「（”"\'’—\(\)]/u', $first_letter, $matches);
+		return (bool)$match;
+	}
+
+	/**
+	 * Add class to element
+	 *
+	 * @param \DOMElement $node
+	 * @param array|string $classes
+	 */
+	public function add_class( \DOMElement &$node, $classes){
+		$classes = (array)$classes;
+		if( $node->hasAttribute('class') ){
+			$classes = array_merge($classes, explode(' ', $node->getAttribute('classs')));
+		}
+		$node->setAttribute('class', implode(' ', $classes));
+	}
+
+	/**
+	 * Get remote assets
+	 *
+	 * @param string $url
+	 *
+	 * @return array|false
+	 */
+	public function getRemote($url){
+		$ch = curl_init($url);
+		curl_setopt_array($ch, [
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_TIMEOUT => 5,
+			CURLOPT_SSL_VERIFYPEER => false,
+			CURLOPT_FAILONERROR => true,
+		]);
+		$result = curl_exec($ch);
+		if( false === $result ){
+			return false;
+		}
+		$return = [
+			'info' => curl_getinfo($ch),
+			'body' => $result,
+		];
+		curl_close($ch);
+		return $return;
 	}
 
 	/**

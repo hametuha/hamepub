@@ -13,6 +13,7 @@ use SebastianBergmann\Exporter\Exception;
  *
  * @package Hametuha\HamePub
  * @property-read Path $path
+ * @property-read string $oebps
  */
 class Distributor
 {
@@ -181,6 +182,9 @@ class Distributor
 		switch( $name ){
 			case 'path':
 				return Path::get();
+				break;
+			case 'oebps':
+				return $this->temp_dir.DIRECTORY_SEPARATOR.'OEBPS';
 				break;
 			default:
 				return null;
