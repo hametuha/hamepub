@@ -1,9 +1,9 @@
 {
-  "name": "hametuha/HamePub",
+  "name": "hametuha/hamepub",
   "description": "PHP Library to handle ePub 3.0",
   "type": "library",
   "keywords": ["WordPress", "ePub"],
-  "homepage": "https://github.com/hametuha/HamePub",
+  "homepage": "https://github.com/hametuha/hamepub",
   "license": "MIT",
   "authors": [
     {
