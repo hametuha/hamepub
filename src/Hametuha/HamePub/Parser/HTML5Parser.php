@@ -80,7 +80,7 @@ class HTML5Parser extends Application
 		$paths = [];
 		foreach( $dom->getElementsByTagName($tag) as $elem ){
 			list($value) = explode('?', $elem->getAttribute($attr));
-			if( false !== strpos($value, $url_base) ){
+			if( preg_match($url_base, $value) ){
 				$path = preg_replace($url_base, $doc_root, $value);
 				if( file_exists($path) ){
 					$dir = 'Asset/';
@@ -170,10 +170,7 @@ class HTML5Parser extends Application
 	 */
 	public function format($content){
 		// Add tcy
-		$content = preg_replace_callback('#(?<=>|^|[^[:ascii:]])([0-9a-zA-Z!?]{1,3})(?![[:ascii:]])#u', function($matches){
-			return sprintf('<span class="tcy">%s</span>', $matches[1]);
-		}, $content);
-
+		$content = $this->tcyiz($content);
 		// Convert DOM
 		$xml = <<<HTML
 <!DOCTYPE html>
@@ -193,8 +190,43 @@ HTML;
 				$this->add_class($p, 'no-indent');
 			}
 		}
+		// Remove all tt, big, acronym, strike
+		$node_to_remove = array();
+		foreach( ['tt', 'big', 'acronym', 'strike'] as $tag){
+			foreach( $dom->getElementsByTagName($tag) as $elem ) {
+				/** @var \DOMElement $elem */
+				$new_elem = $dom->createElement( 'span' );
+				// Copy all attributes
+				if ( $elem->attributes ) {
+					foreach ( $elem->attributes as $attr ) {
+						$new_elem->setAttribute( $attr->nodeName, $attr->nodeValue );
+					}
+				}
+				// Add original tag name as class
+				$this->add_class($new_elem, $tag);
+				// Copy all nodes
+				foreach ( $elem->childNodes as $child ) {
+					$new_elem->appendChild( $elem->removeChild( $child ) );
+				}
+				$node_to_remove[] = $elem;
+				$elem->parentNode->replaceChild( $new_elem, $elem );
+			}
+		}
 		preg_match('/<body>(.*)<\/body>/s', $this->html5->saveHTML($dom), $match);
 		return $match[1];
+	}
+
+	/**
+	 * Make string tcyed
+	 *
+	 * @param $string
+	 *
+	 * @return string
+	 */
+	public function tcyiz($string){
+		return preg_replace_callback('#(?<=>|^|[^[:ascii:]])([0-9a-zA-Z!?]{1,3})(?![[:ascii:]])#u', function($matches){
+			return sprintf('<span class="tcy">%s</span>', $matches[1]);
+		}, $string);
 	}
 
 	/**

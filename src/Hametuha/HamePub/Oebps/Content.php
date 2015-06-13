@@ -150,6 +150,30 @@ class Content extends Prototype
 	}
 
 	/**
+	 * Add guide element
+	 *
+	 * This `guide` element is not nescesary for ePub 3.0,
+	 * but KF8(Kindle) still requires it.
+	 *
+	 * @see http://www.idpf.org/epub/20/spec/OPF_2.0.1_draft.htm#Section2.6
+	 * @param string $type
+	 * @param string $href
+	 *
+	 * @return mixed
+	 */
+	public function addGuide($type, $href){
+		if( !$this->dom->guide->count() ){
+			$guide = $this->dom->addChild('guide');
+		}else{
+			$guide = $this->dom->guide;
+		}
+		$ref = $guide->addChild('reference');
+		$ref['type'] = $type;
+		$ref['href'] = $href;
+		return $ref;
+	}
+
+	/**
 	 * Convert id to path
 	 *
 	 * @param string $path

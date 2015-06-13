@@ -101,12 +101,25 @@ HTML;
 		if( !$this->root ){
 			return '';
 		}
-		$html = '<nav epub:type="toc" id="toc"><ol>';
+		$landmarks = '';
+		$toc = '';
 		foreach( $this->children as $child ){
-			$html .= $this->makeList($child);
+			$toc .= $this->makeList($child);
+			$landmarks .= $this->makeList($child, true);
 		}
-		$html .= '</ol></nav>';
-		return $html;
+		$html = <<<HTML
+<nav epub:type="toc" id="toc">
+	<ol>
+		{$toc}
+	</ol>
+</nav>
+<nav epub:type="landmarks" hidden="hidden" class="hidden">
+	<ol epub:type="list">
+		{$landmarks}
+	</ol>
+</nav>
+HTML;
+		return trim($html);
 	}
 
 	/**
@@ -116,16 +129,44 @@ HTML;
 	 *
 	 * @return string
 	 */
-	private function makeList( Toc $toc ){
-		$html = sprintf('<li><a href="%s">%s</a>', $toc->link, htmlspecialchars($toc->label, ENT_QUOTES, 'UTF-8'));
-		if( !empty($toc->children) ){
-			$html .= '<ol>';
-			foreach( $toc->children as $child ){
-				$html .= $this->makeList($child);
+	private function makeList( Toc $toc, $require_type = false ){
+		if( !$require_type ){
+			$epub_type = '';
+		}else{
+			$type = strtolower(str_replace('.xhtml', '', $toc->link));
+			switch( $type ){
+				case 'cover':
+				case 'toc':
+				case 'landmarks':
+				case 'preface':
+				case 'prologue':
+				case 'epigraph':
+				case 'epilogue':
+				case 'afterword':
+				case 'colophon':
+				case 'bibliography':
+				case 'titlepage':
+				case 'contributors':
+				case 'dedication':
+					$epub_type = $type;
+					break;
+				default:
+					$epub_type = 'bodymatter';
+					break;
 			}
-			$html .= '</ol>';
+			if( $epub_type ){
+				$epub_type = sprintf(' epub:type="%s"', $epub_type);
+			}
 		}
-		$html .= '</li>';
+		$html = sprintf('<li><a href="%s"%s>%s</a>', $toc->link, $epub_type, htmlspecialchars($toc->label, ENT_QUOTES, 'UTF-8'));
+		if( !empty($toc->children) ){
+			$html .= "\n<ol>\n";
+			foreach( $toc->children as $child ){
+				$html .= $this->makeList($child, $require_type);
+			}
+			$html .= "</ol>\n";
+		}
+		$html .= "</li>\n";
 		return $html;
 	}
 
