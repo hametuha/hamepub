@@ -5,6 +5,7 @@ namespace Hametuha\HamePub\Parser;
 
 use Hametuha\HamePub\Definitions\Mime;
 use Hametuha\HamePub\Pattern\Application;
+use Hametuha\HamePub\Oebps\Toc;
 use Masterminds\HTML5;
 
 /**
@@ -18,7 +19,7 @@ class HTML5Parser extends Application
 	/**
 	 * @var HTML5
 	 */
-	protected $html5 = null;
+	public $html5 = null;
 
 	/**
 	 * Constructor
@@ -161,6 +162,123 @@ class HTML5Parser extends Application
 		return $paths;
 	}
 
+
+	public function grabHeaders(Toc &$toc, &$dom, $add_id = true, $max_depth = 3){
+		$headers = [];
+		$max_depth = max(1, min($max_depth, 6));
+		$xpath = new \DOMXPath($dom);
+
+		$query = sprintf("//*[%s]", implode(' or ', array_map(function($depth){
+			return sprintf("name()='h%d'", $depth);
+		}, range(1, $max_depth))));
+		$counter = 0;
+		foreach( $xpath->query($query) as $header ){
+			$counter++;
+			/** @var \DomElement $header */
+			$tag_level = intval(preg_replace('/[^0-9]/u', '', $header->tagName));
+			if( $header->hasAttribute('id') ){
+				$header_id = (string)$header->getAttribute('id');
+			}else{
+				$header_id = sprintf('header%d-%03d', $tag_level, $counter);
+				if( $add_id ){
+					$header->setAttribute('id', $header_id);
+				}
+			}
+			$headers[$header_id] = [
+				'level' => $tag_level,
+			    'content' => $header->textContent,
+			    'children' => []
+			];
+		}
+		if( !$headers ){
+			return [];
+		}
+		$arranged = [];
+		foreach( $headers as $key => $header ){
+			if( !$this->digToc($key, $header, $arranged) ){
+				$arranged[$key] = $header;
+			}
+		}
+		$this->recursiveToc($toc, $toc->link, $arranged);
+		return $toc;
+	}
+
+	/**
+	 * Recursively add toc
+	 *
+	 * @param Toc $toc
+	 * @param string $src
+	 * @param array $headers
+	 */
+	private function recursiveToc(Toc &$toc, $src, array $headers){
+		foreach( $headers as $id => $header ){
+			$child = $toc->addChild($header['content'], $src.'#'.$id);
+			if( $header['children'] ){
+				$this->recursiveToc($child, $src, $header['children']);
+			}
+		}
+	}
+
+	/**
+	 * Arrange toc elements
+	 *
+	 * @param string $id
+	 * @param array $header
+	 * @param array $headers
+	 *
+	 * @return bool
+	 */
+	private function digToc($id, array $header, array &$headers){
+		$keys = array_keys($headers);
+		krsort($keys);
+		$done = false;
+		foreach( $keys as $key ){
+			if( $headers[$key]['level'] < $header['level'] ){
+				if( !$this->digToc($id, $header, $headers[$key]['children']) ){
+					$headers[$key]['children'][$id] = $header;
+				}
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Get dom document from html segments.
+	 *
+	 * @param string $string
+	 *
+	 * @return \DOMDocument
+	 */
+	public function getDomFromString($string){
+		// Convert DOM
+		$xml = <<<HTML
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+</head>
+<body>
+{$string}
+</body>
+</html>
+HTML;
+		return $this->html5->loadHTML($xml);
+	}
+
+	/**
+	 * @param $dom
+	 *
+	 * @return null
+	 */
+	public function retrieveBody($dom){
+		if( preg_match('/<body>(.*)<\/body>/s', $this->html5->saveHTML($dom), $match) ){
+			return $match[1];
+		}else{
+			return null;
+		}
+	}
+
 	/**
 	 * Convert xml
 	 *
@@ -171,28 +289,16 @@ class HTML5Parser extends Application
 	public function format($content){
 		// Add tcy
 		$content = $this->tcyiz($content);
-		// Convert DOM
-		$xml = <<<HTML
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="UTF-8" />
-</head>
-<body>
-{$content}
-</body>
-</html>
-HTML;
 		// Add auto indent
-		$dom = $this->html5->loadHTML($xml);
+		$dom = $this->getDomFromString($content);
 		foreach( $dom->getElementsByTagName('p') as $p ){
 			if( !$this->need_indent($p->nodeValue) ){
 				$this->add_class($p, 'no-indent');
 			}
 		}
-		// Remove all tt, big, acronym, strike
+		// Remove all tt, big, acronym, strike, abbr
 		$node_to_remove = array();
-		foreach( ['tt', 'big', 'acronym', 'strike'] as $tag){
+		foreach( ['tt', 'big', 'acronym', 'abbr', 'strike'] as $tag){
 			foreach( $dom->getElementsByTagName($tag) as $elem ) {
 				/** @var \DOMElement $elem */
 				$new_elem = $dom->createElement( 'span' );
@@ -212,8 +318,7 @@ HTML;
 				$elem->parentNode->replaceChild( $new_elem, $elem );
 			}
 		}
-		preg_match('/<body>(.*)<\/body>/s', $this->html5->saveHTML($dom), $match);
-		return $match[1];
+		return $this->retrieveBody($dom);
 	}
 
 	/**

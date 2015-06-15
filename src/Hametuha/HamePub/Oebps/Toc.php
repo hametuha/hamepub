@@ -22,17 +22,17 @@ class Toc
 	/**
 	 * @var string
 	 */
-	protected $label = '';
+	public $label = '';
 
 	/**
 	 * @var string
 	 */
-	protected $link = '';
+	public $link = '';
 
 	/**
 	 * @var bool
 	 */
-	protected $root = true;
+	public $root = true;
 
 	/**
 	 * Children storage
@@ -60,9 +60,11 @@ class Toc
 	 * @param string $label
 	 * @param string $link
 	 * @param int $index
+	 * @return Toc
 	 */
 	public function addChild($label, $link, $index = -1){
-		$this->children[$label] = new Toc($label, $link);
+		$this->children[$link] = new Toc($label, $link);
+		return $this->children[$link];
 	}
 
 	/**
@@ -95,17 +97,18 @@ HTML;
 	/**
 	 * Get navigation html
 	 *
+	 * @param string $content_label
 	 * @return string
 	 */
-	public function getNavHTML(){
+	public function getNavHTML($content_label){
 		if( !$this->root ){
 			return '';
 		}
 		$landmarks = '';
 		$toc = '';
 		foreach( $this->children as $child ){
-			$toc .= $this->makeList($child);
-			$landmarks .= $this->makeList($child, true);
+			$toc .= $this->makeList($child, false);
+			$landmarks .= $this->makeList($child, true, $content_label);
 		}
 		$html = <<<HTML
 <nav epub:type="toc" id="toc">
@@ -113,7 +116,8 @@ HTML;
 		{$toc}
 	</ol>
 </nav>
-<nav epub:type="landmarks" hidden="hidden" class="hidden">
+
+<nav id="landmarks" epub:type="landmarks" hidden="hidden" class="hidden">
 	<ol epub:type="list">
 		{$landmarks}
 	</ol>
@@ -126,13 +130,24 @@ HTML;
 	 * Make list
 	 *
 	 * @param Toc $toc
-	 *
+	 * @param bool $require_type Default false. If true, landmarks will be created.
+	 * @param string $content_label
 	 * @return string
 	 */
-	private function makeList( Toc $toc, $require_type = false ){
+	private function makeList( Toc $toc, $require_type = false, $content_label = ''){
+		static $did_body_matter = false;
 		if( !$require_type ){
-			$epub_type = '';
+			// For toc
+			$html = sprintf('<li><a href="%s">%s</a>', $toc->link, htmlspecialchars($toc->label, ENT_QUOTES, 'UTF-8'));
+			if( !empty($toc->children) ){
+				$html .= "\n<ol". ($require_type ? ' epub:type="list"' : '') .">\n";
+				foreach( $toc->children as $child ){
+					$html .= $this->makeList($child, $require_type);
+				}
+				$html .= "</ol>\n";
+			}
 		}else{
+			// For landmark
 			$type = strtolower(str_replace('.xhtml', '', $toc->link));
 			switch( $type ){
 				case 'cover':
@@ -151,20 +166,29 @@ HTML;
 					$epub_type = $type;
 					break;
 				default:
-					$epub_type = 'bodymatter';
+					if( false !== strpos($type, '#') ){
+						$epub_type = 'bridgehead';
+					}else{
+						$epub_type = 'bodymatter';
+					}
 					break;
 			}
-			if( $epub_type ){
-				$epub_type = sprintf(' epub:type="%s"', $epub_type);
+
+			if( !$epub_type || 'bridgehead' == $epub_type ){
+				return '';
 			}
-		}
-		$html = sprintf('<li><a href="%s"%s>%s</a>', $toc->link, $epub_type, htmlspecialchars($toc->label, ENT_QUOTES, 'UTF-8'));
-		if( !empty($toc->children) ){
-			$html .= "\n<ol>\n";
-			foreach( $toc->children as $child ){
-				$html .= $this->makeList($child, $require_type);
+			$label = $toc->label;
+			if( 'bodymatter' === $epub_type ){
+				if( $did_body_matter ){
+					return '';
+				}else{
+					$did_body_matter = true;
+				}
+				if( $content_label ){
+					$label = $content_label;
+				}
 			}
-			$html .= "</ol>\n";
+			$html = sprintf('<li><a href="%s" epub:type="%s">%s</a>', $toc->link, $epub_type, htmlspecialchars($label, ENT_QUOTES, 'UTF-8'));
 		}
 		$html .= "</li>\n";
 		return $html;

@@ -33,8 +33,10 @@ class Factory extends AbstractFactory
 	public function registerHTML($id, $html, $linear = 'yes', array $properties = []){
 		$dom = $this->parser->parseFromString($html);
 		if( $dom ){
+			if( !isset($this->doms[$id]) ){
+				$this->opf->addIdref($id.'.xhtml', $linear, $properties);
+			}
 			$this->doms[$id] = $dom;
-			$this->opf->addIdref($id.'.xhtml', $linear, $properties);
 			return $dom;
 		}
 		return false;
