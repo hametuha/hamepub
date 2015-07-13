@@ -163,14 +163,24 @@ class HTML5Parser extends Application
 	}
 
 
-	public function grabHeaders(Toc &$toc, &$dom, $add_id = true, $max_depth = 3){
+	/**
+	 * @param Toc $toc
+	 * @param $dom
+	 * @param bool|true $add_id
+	 * @param int $max_depth
+	 * @param int $min_level
+	 *
+	 * @return array|Toc
+	 */
+	public function grabHeaders(Toc &$toc, &$dom, $add_id = true, $max_depth = 3, $min_level = 1){
 		$headers = [];
 		$max_depth = max(1, min($max_depth, 6));
+		$min_level = max(1, $min_level);
 		$xpath = new \DOMXPath($dom);
 
 		$query = sprintf("//*[%s]", implode(' or ', array_map(function($depth){
 			return sprintf("name()='h%d'", $depth);
-		}, range(1, $max_depth))));
+		}, range($min_level, $max_depth))));
 		$counter = 0;
 		foreach( $xpath->query($query) as $header ){
 			$counter++;
