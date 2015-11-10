@@ -40,9 +40,9 @@ class Content extends Prototype
 	 * @return \SimpleXMLElement
 	 */
 	public function setLang($lang_code){
-		$lang = $this->dom->metadata->children('dc', true)->lang[0];
+		$lang = $this->dom->metadata->children('dc', true)->language[0];
 		$lang[0] = $this->h($lang_code);
-		return $lang[0];
+		return $lang;
 	}
 
 	/**

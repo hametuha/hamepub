@@ -27,7 +27,7 @@ class ContentTest extends Hametuha\HamePub\Test
 		// Set identifier and language
 		$this->content->setIdentifier('http://hametuha.com');
 		$this->content->setLang('en_US');
-		// Set meta dadta
+		// Set meta data
 		// title
 		$this->content->addMeta('dc:title', 'ePub by Hametuha');
 		// schema

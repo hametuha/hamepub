@@ -30,10 +30,10 @@ class MimeTest extends \Hametuha\HamePub\Test
 		$this->assertEquals('Text', Mime::getDestinationFolder('test.xhtml'));
 		$this->assertEquals('Text', Mime::getDestinationFolder('test.html'));
 		$this->assertEquals('CSS', Mime::getDestinationFolder('style.css'));
-		$this->assertEquals('Media', Mime::getDestinationFolder('test.html'));
-		$this->assertEquals('Speech', Mime::getDestinationFolder('test.html'));
-		$this->assertEquals('JS', Mime::getDestinationFolder('test.html'));
-		$this->assertEquals('Misc', Mime::getDestinationFolder('test.html'));
+//		$this->assertEquals('Media', Mime::getDestinationFolder('test.html'));
+//		$this->assertEquals('Speech', Mime::getDestinationFolder('test.html'));
+//		$this->assertEquals('JS', Mime::getDestinationFolder('test.html'));
+//		$this->assertEquals('Misc', Mime::getDestinationFolder('test.html'));
 	}
 
 }
