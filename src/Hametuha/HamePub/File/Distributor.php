@@ -13,6 +13,7 @@ use SebastianBergmann\Exporter\Exception;
  *
  * @package Hametuha\HamePub
  * @property-read Path $path
+ * @property-read string $oebps
  */
 class Distributor
 {
@@ -20,7 +21,7 @@ class Distributor
 	/**
 	 * @var array
 	 */
-	private static $instances = [];
+	protected static $instances = [];
 
 	/**
 	 * @var string
@@ -141,6 +142,41 @@ class Distributor
 	}
 
 	/**
+	 * Remove directory
+	 *
+	 * @throws \Exception
+	 */
+	public function delete(){
+		$this->rm($this->temp_dir);
+	}
+
+	/**
+	 * Remove directory recursively
+	 *
+	 * @param string $dir_or_file
+	 *
+	 * @throws \Exception
+	 */
+	private function rm($dir_or_file){
+		if( is_dir($dir_or_file) ){
+			foreach( scandir($dir_or_file) as $file ){
+				if( false === array_search($file, ['.', '..']) ){
+					$this->rm( rtrim($dir_or_file, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $file );
+				}
+			}
+			if( !rmdir($dir_or_file) ){
+				throw new \Exception(sprintf('Failed to delete %s. Please check permission', $dir_or_file), 403);
+			}
+		}elseif( is_file($dir_or_file) ){
+			if( !unlink($dir_or_file) ){
+				throw new \Exception(sprintf('Failed to delete %s. Please check permission', $dir_or_file), 403);
+			}
+		}else{
+			throw new \Exception(sprintf('%s is not file or directory.', $dir_or_file), 404);
+		}
+	}
+
+	/**
 	 * Copy file into zip
 	 *
 	 * @param \ZipArchive $epub
@@ -181,6 +217,9 @@ class Distributor
 		switch( $name ){
 			case 'path':
 				return Path::get();
+				break;
+			case 'oebps':
+				return $this->temp_dir.DIRECTORY_SEPARATOR.'OEBPS';
 				break;
 			default:
 				return null;

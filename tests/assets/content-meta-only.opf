@@ -19,5 +19,5 @@
           href="Images/images/fig2.jpg"
           media-type="image/jpeg"/>
   </manifest>
-  <spine toc="ncx"></spine>
+  <spine page-progression-direction="default"></spine>
 </package>
