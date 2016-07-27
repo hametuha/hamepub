@@ -22,6 +22,16 @@ class HTML5Parser extends Application
 	public $html5 = null;
 
 	/**
+	 * @var array
+	 */
+	protected $tag_deprecated = ['tt', 'big', 'acronym', 'abbr', 'strike'];
+
+	/**
+	 * @var array
+	 */
+	protected $tag_to_remove = ['colgroup'];
+
+	/**
 	 * Constructor
 	 *
 	 * @param string $id
@@ -77,9 +87,10 @@ class HTML5Parser extends Application
 	 * @param string $doc_root
 	 * @return array
 	 */
-	public function extractAssets(\DomDocument &$dom, $tag, $attr, $url_base, $doc_root ){
+	public function extractAssets( \DomDocument &$dom, $tag, $attr, $url_base, $doc_root ){
 		$paths = [];
 		foreach( $dom->getElementsByTagName($tag) as $elem ){
+			/** @var \DOMElement $elem */
 			list($value) = explode('?', $elem->getAttribute($attr));
 			if( preg_match($url_base, $value) ){
 				$path = preg_replace($url_base, $doc_root, $value);
@@ -128,6 +139,7 @@ class HTML5Parser extends Application
 		$paths = [];
 		foreach(['img' => 'src', 'script' => 'src', 'link' => 'href'] as $tag => $attr){
 			foreach( $dom->getElementsByTagName($tag) as $elem ){
+				/** @var \DOMElement $elem */
 				$url = $elem->getAttribute($attr);
 				if( !preg_match('/^(https?:)?\/\//', $url) ){
 					continue;
@@ -306,9 +318,9 @@ HTML;
 				$this->add_class($p, 'no-indent');
 			}
 		}
-		// Remove all tt, big, acronym, strike, abbr
+		// Change all disabled tags.
 		$node_to_remove = array();
-		foreach( ['tt', 'big', 'acronym', 'abbr', 'strike'] as $tag){
+		foreach( $this->tag_deprecated as $tag){
 			foreach( $dom->getElementsByTagName($tag) as $elem ) {
 				/** @var \DOMElement $elem */
 				$new_elem = $dom->createElement( 'span' );
@@ -328,6 +340,14 @@ HTML;
 				$elem->parentNode->replaceChild( $new_elem, $elem );
 			}
 		}
+		// Remove all tags
+		foreach ( $this->tag_to_remove as $tag ) {
+			foreach( $dom->getElementsByTagName($tag) as $elem ) {
+				/** @var \DOMElement $elem */
+				$elem->parentNode->removeChild($elem);
+			}
+		}
+		// Remove
 		return $this->retrieveBody($dom);
 	}
 
@@ -339,9 +359,17 @@ HTML;
 	 * @return string
 	 */
 	public function tcyiz($string){
-		return preg_replace_callback('#(?<=>|^|[^[:ascii:]])([0-9a-zA-Z!?]{1,3})(?![[:ascii:]])#u', function($matches){
+		// Add tcy
+		$string = preg_replace_callback('#(?<=>|^|[^[:ascii:]/])([0-9a-zA-Z!?]{1,3})(?![[:ascii:]/])#u', function($matches){
 			return sprintf('<span class="tcy">%s</span>', $matches[1]);
 		}, $string);
+		// Remove tcy in attribute
+		$string = preg_replace_callback( '#( [a-z\-0-9]+)="([^"]*<span class="tcy">.*(?!=tcy|class=))"#u', function($matches){
+			$attr = str_replace( '</span>', '', $matches[2] );
+			$attr = str_replace( '<span class="tcy">', '', $attr );
+			return sprintf( '%s="%s"', $matches[1], $attr );
+		}, $string );
+		return $string;
 	}
 
 	/**

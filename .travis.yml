@@ -12,4 +12,5 @@ install:
 
 # configure notifications (email, IRC, campfire etc)
 notifications:
+  on_success: never
   slack: hametuha:FuK3UZEQxIKk4lbAU1lpkmdr
