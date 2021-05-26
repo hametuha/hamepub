@@ -83,7 +83,7 @@ abstract class Test extends \PHPUnit_Framework_TestCase
 				return $this->tmp_dir.DIRECTORY_SEPARATOR.$this->id;
 				break;
 			case 'base_dir':
-				return dirname(dirname(dirname(__DIR__))).DIRECTORY_SEPARATOR.'tests';
+				return dirname(dirname(dirname(__DIR__)));
 				break;
 			default:
 				return null;

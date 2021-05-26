@@ -12,17 +12,25 @@
       "email": "takahashi.fumiki@hametuha.co.jp"
     }
   ],
+  "scripts": {
+    "test": "phpunit"
+  },
   "require": {
     "php": ">=5.4",
     "masterminds/html5": "2.*"
   },
   "require-dev": {
-    "phpunit/phpunit": "4.4.*",
+    "phpunit/phpunit" : "^4.8.35 || ^5.7.21",
     "d11wtq/boris": "1.0.8"
   },
   "autoload": {
     "psr-0": {
       "Hametuha\\HamePub": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-0": {
+      "Hametuha\\HamePub\\Test": "tests/src"
     }
   }
 }
