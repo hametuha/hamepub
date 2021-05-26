@@ -1,7 +1,6 @@
 HamePub
 =======
 
-A PHP Library for ePub by Hametuha. 
 
 [![GitHub actions for HamePub](https://github.com/hametuha/hamepub/actions/workflows/hamepub.yml/badge.svg)](https://github.com/hametuha/hamepub/actions)
 

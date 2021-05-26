@@ -38,6 +38,11 @@ class Mime extends Prototype {
 	const XHTML = 'application/xhtml+xml';
 
 	/**
+	 * HTML Content Documents
+	 */
+	const HTML = 'text/html';
+
+	/**
 	 * NCX
 	 *
 	 * @deprecated

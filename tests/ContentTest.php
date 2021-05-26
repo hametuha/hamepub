@@ -1,7 +1,7 @@
 <?php
 
 use Hametuha\HamePub\Oebps\Content;
-use \Hametuha\HamePub\Definitions\Marc;
+use Hametuha\HamePub\Definitions\Marc;
 
 class ContentTest extends Hametuha\HamePub\Test
 {
