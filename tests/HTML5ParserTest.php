@@ -20,13 +20,13 @@ class HTML5ParserTest extends Test
 		$expected = file_get_contents($this->asset_dir.'/test.html');
 		$real = $html5->getRemoteFile($this->remote_url);
 		$this->assertEquals($expected, $real);
-		// Try Timeout
-		$content = $html5->getRemoteFile('https://takahashifumiki.com/timeout.php', [
-			'http' => [
-				'timeout' => 3,
-			],
-		] );
-		$this->assertFalse($content);
+//		// Try Timeout
+//		$content = $html5->getRemoteFile('https://takahashifumiki.com/timeout.php', [
+//			'http' => [
+//				'timeout' => 3,
+//			],
+//		] );
+//		$this->assertFalse($content);
 	}
 
 	/**
