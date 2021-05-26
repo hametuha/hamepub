@@ -21,7 +21,7 @@ class HTML5ParserTest extends Test
 		$real = $html5->getRemoteFile($this->remote_url);
 		$this->assertEquals($expected, $real);
 		// Try Timeout
-		$content = $html5->getRemoteFile('http://takahashifumiki.com/timeout.php');
+		$content = $html5->getRemoteFile('https://takahashifumiki.com/timeout.php');
 		$this->assertFalse($content);
 	}
 
