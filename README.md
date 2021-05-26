@@ -1,7 +1,8 @@
 HamePub
 =======
 
-A PHP Library for ePub by Hametuha. [![Build Status](https://travis-ci.org/hametuha/hamepub.svg)](https://travis-ci.org/hametuha/HamePub)
+
+[![GitHub actions for HamePub](https://github.com/hametuha/hamepub/actions/workflows/hamepub.yml/badge.svg)](https://github.com/hametuha/hamepub/actions)
 
 HemePub's living example is [hametuha](http://hametuha.com). It's a WordPress site which is able to publish it's contents to ePub.
 
