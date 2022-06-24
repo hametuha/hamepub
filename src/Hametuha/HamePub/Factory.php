@@ -42,7 +42,6 @@ class Factory extends AbstractFactory
 		return false;
 	}
 
-
 	/**
 	 * Load from path
 	 *

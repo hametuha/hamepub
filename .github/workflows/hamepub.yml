@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         operating-system: [ ubuntu-latest ]  # OS. ubuntu-18.04 is also available.
-        php: [ '5.6', '7.2', '7.4' ] # PHP versions to check.
+        php: [ '7.2', '7.4', '8.0', '8.1' ] # PHP versions to check.
     name: HamePub in PHP ${{ matrix.php }} UnitTest
     steps:
       - uses: actions/checkout@master

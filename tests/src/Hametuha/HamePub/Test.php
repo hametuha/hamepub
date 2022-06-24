@@ -2,6 +2,7 @@
 
 namespace Hametuha\HamePub;
 use Hametuha\HamePub\File\Distributor;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Test class
@@ -13,7 +14,7 @@ use Hametuha\HamePub\File\Distributor;
  * @property-read string $base_dir
  * @property-read string $epub_dir
  */
-abstract class Test extends \PHPUnit_Framework_TestCase
+abstract class Test extends TestCase
 {
 
 	/**
@@ -29,7 +30,7 @@ abstract class Test extends \PHPUnit_Framework_TestCase
 	/**
 	 * Set up test stui
 	 */
-	protected function setUp(){
+	protected function setUp():void {
 		// Set distributor
 		$this->distributor = Distributor::get($this->id, $this->tmp_dir);
 	}
@@ -37,7 +38,7 @@ abstract class Test extends \PHPUnit_Framework_TestCase
 	/**
 	 * Remove ePub directory
 	 */
-	protected function tearDown() {
+	protected function tearDown():void {
 		$this->removeDirectory($this->epub_dir);
 	}
 
