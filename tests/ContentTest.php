@@ -14,7 +14,7 @@ class ContentTest extends Hametuha\HamePub\Test
 	/**
 	 * Set up
 	 */
-	protected function setUp(){
+	protected function setUp():void {
 		parent::setUp();
 		$this->content = Content::get($this->id);
 	}
