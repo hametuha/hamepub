@@ -71,13 +71,38 @@ class Content extends Prototype
     }
 
     /**
+     * Add author to as meta value.
+     *
+     * @param string $value Name of author.
+     * @param string $id    ID of author.
+     * @param string $tag   Default is 'creator' or 'contributor'
+     * @param string $role  Role tag. See {https://www.loc.gov/marc/relators/relaterm.html}
+     *
+     * @return void
+     */
+    public function addAuthor( $value, $id, $tag = 'creator', $role = '' ) {
+        $creator = $this->dom->metadata->addChild( $tag, $this->h( $value ), Schemas::DC );
+        $creator['id'] = $id;
+        if ( $role ) {
+            $meta = $this->dom->metadata->addChild( 'meta', $role );
+            $meta['refines'] = '#' . $id;
+            $meta['property'] = 'role';
+            $meta['scheme'] = 'marc:relators';
+            $meta['id'] = 'role-of-' . $id;
+        }
+    }
+
+    /**
      * Add modified date
      *
-     * @param int $timestamp UTC timestamp
+     * @param int|string $timestamp If int, treated as UTC timestamp.
      */
     public function setModifiedDate($timestamp)
     {
-        $this->addMeta('meta', date('Y-m-d\TH:i:s\Z', $timestamp), [
+        if ( is_int( $timestamp ) ) {
+            $timestamp = date('Y-m-d\TH:i:s\Z', $timestamp);
+        }
+        $this->addMeta('meta', $timestamp, [
             'property' => 'dcterms:modified',
         ]);
     }
@@ -104,7 +129,7 @@ class Content extends Prototype
     }
 
     /**
-     * Add item to
+     * Add item to Content OPF.
      *
      * @param string $relative_path
      * @param string $id If empty, path will convert to id

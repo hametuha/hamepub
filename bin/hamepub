@@ -29,6 +29,15 @@ $app->registerCommand('generate', function( CommandCall $input ) use ($app, $roo
 		// This is not file.
 		$app->getPrinter()->error('Setting file not found.', false);
 	}
+    // Generate temp directory.
+    $tmp_dir = $input->hasParam( 'tmp' ) ? $input->getParam( 'tmp' ) : tempnam( sys_get_temp_dir(), 'hamepub-' );
+    try {
+        $packager = \Hametuha\HamePub\Packager::get();
+        $path = $packager->parse( $file, $tmp_dir );
+        $app->getPrinter()->success("Generated ePub: {$path}", false);
+    } catch ( \Exception $e ) {
+        $app->getPrinter()->error($e->getMessage(), false);
+    }
 
 });
 

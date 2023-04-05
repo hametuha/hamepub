@@ -58,7 +58,7 @@ foreach( $contents as $key => $html ){
 $factory->opf->setLang( 'en_US' );
 $factory->opf->setTitle( 'My First eBook', 'main-title' );
 $factory->opf->putXML();
-$factory->container->pubXML();
+$factory->container->putXML();
 // Save it!
 $factory->compile('path/to/epub');
 ```
@@ -70,6 +70,10 @@ $factory->compile('path/to/epub');
 ## Caution
 
 This library is under alpha and highly experimental. Do not trust this until Beta! 
+
+## Acknowledgement
+
+The sample picture is credited by [Public Domain Pictures](https://www.pexels.com/ja-jp/photo/87742/) and [Nadi Lindsay](https://www.pexels.com/ja-jp/photo/3078831/).
 
 ## License
 

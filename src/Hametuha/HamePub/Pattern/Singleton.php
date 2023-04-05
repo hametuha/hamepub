@@ -7,7 +7,7 @@ namespace Hametuha\HamePub\Pattern;
  *
  * @package Hametuha\HamePub\Pattern
  */
-class Singleton
+abstract class Singleton
 {
     /**
      * @var static[]
@@ -17,25 +17,32 @@ class Singleton
     /**
      * Constructor
      *
-     * @param array $settings
      */
-    protected function __construct(array $settings = [])
+    protected function __construct()
     {
-        // Do nothing
+        $this->init();
+    }
+
+    /**
+     * Executed in constructor.
+     *
+     * @return void
+     */
+    protected function init()
+    {
+        // Do something.
     }
 
     /**
      * Get instance
      *
-     * @param array $settings
-     *
      * @return static
      */
-    public static function get(array $settings = [])
+    public static function get()
     {
         $class_name = get_called_class();
         if (!isset(self::$instances[$class_name])) {
-            self::$instances[$class_name] = new $class_name($settings);
+            self::$instances[$class_name] = new $class_name();
         }
         return self::$instances[$class_name];
     }
