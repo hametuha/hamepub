@@ -2,153 +2,152 @@
 
 namespace Hametuha\HamePub\Definitions;
 
-
 /**
  * Mime types
  *
  * @see http://imagedrive.github.io/spec/epub301-publications.xhtml#tbl-core-media-types
  * @package Hametuha\HamePub\Definitions
  */
-class Mime extends Prototype {
+class Mime extends Prototype
+{
+    /**
+     * GIF Image
+     */
+    public const GIF = 'image/gif';
 
+    /**
+     * JPEG Image
+     */
+    public const JPEG = 'image/jpeg';
 
-	/**
-	 * GIF Image
-	 */
-	const GIF = 'image/gif';
+    /**
+     * PNG Image
+     */
+    public const PNG = 'image/png';
 
-	/**
-	 * JPEG Image
-	 */
-	const JPEG = 'image/jpeg';
+    /**
+     * SVG Content Documents
+     */
+    public const SVG = 'image/svg+xml';
 
-	/**
-	 * PNG Image
-	 */
-	const PNG = 'image/png';
+    /**
+     * XHTML Content Documents
+     */
+    public const XHTML = 'application/xhtml+xml';
 
-	/**
-	 * SVG Content Documents
-	 */
-	const SVG = 'image/svg+xml';
+    /**
+     * HTML Content Documents
+     */
+    public const HTML = 'text/html';
 
-	/**
-	 * XHTML Content Documents
-	 */
-	const XHTML = 'application/xhtml+xml';
+    /**
+     * NCX
+     *
+     * @deprecated
+     */
+    public const OPF2 = 'application/x-dtbncx+xml';
 
-	/**
-	 * HTML Content Documents
-	 */
-	const HTML = 'text/html';
+    /**
+     * OpenType font
+     */
+    public const OpenType = 'application/vnd.ms-opentype'; // phpcs:ignore Generic.NamingConventions.UpperCaseConstantName.ClassConstantNotUpperCase
 
-	/**
-	 * NCX
-	 *
-	 * @deprecated
-	 */
-	const OPF2 = 'application/x-dtbncx+xml';
+    /**
+     * WOFF font
+     */
+    public const WOFF = 'application/font-woff';
 
-	/**
-	 * OpenType font
-	 */
-	const OpenType = 'application/vnd.ms-opentype';
+    /**
+     * EPUB Media Overlay Document
+     */
+    public const MediaOverlays301 = 'application/smil+xml'; // phpcs:ignore Generic.NamingConventions.UpperCaseConstantName.ClassConstantNotUpperCase
 
-	/**
-	 * WOFF font
-	 */
-	const WOFF = 'application/font-woff';
+    /**
+     * Text-to-Speech Vocabulary
+     */
+    public const PLS = 'application/pls+xml';
 
-	/**
-	 * EPUB Media Overlay Document
-	 */
-	const MediaOverlays301 = 'application/smil+xml';
+    /**
+     * MP3 Audio
+     */
+    public const MP3 = 'audio/mpeg';
 
-	/**
-	 * Text-to-Speech Vocabulary
-	 */
-	const PLS = 'application/pls+xml';
+    /**
+     * MP4, AAC, LC Audio
+     */
+    public const MP4 = 'audio/mp4';
 
-	/**
-	 * MP3 Audio
-	 */
-	const MP3 = 'audio/mpeg';
+    /**
+     * EPUB Style Sheets
+     */
+    public const CSS = 'text/css';
 
-	/**
-	 * MP4, AAC, LC Audio
-	 */
-	const MP4 = 'audio/mp4';
+    /**
+     * Scripts
+     */
+    public const JS = 'text/javascript';
 
-	/**
-	 * EPUB Style Sheets
-	 */
-	const CSS = 'text/css';
+    /**
+     * Get extension from file path
+     *
+     * @param string $file_name
+     *
+     * @return string
+     */
+    public static function getTypeFromPath($file_name)
+    {
+        $ext = strtolower(preg_replace('/^.*\.([^.]+)$/', '$1', $file_name));
+        switch ($ext) {
+            case 'jpeg':
+            case 'jpg':
+                return self::JPEG;
+                break;
+            case 'otf':
+                return self::OpenType;
+                break;
+            case 'opf':
+                return self::OPF2;
+                break;
+            case 'smil':
+                return self::MediaOverlays301;
+                break;
+            case 'js':
+                return self::JS;
+                break;
+            default:
+                $const_name = strtoupper($ext);
+                $refl = new \ReflectionClass(get_called_class());
+                return $refl->getConstant($const_name);
+                break;
+        }
+    }
 
-	/**
-	 * Scripts
-	 */
-	const JS = 'text/javascript';
-
-	/**
-	 * Get extension from file path
-	 *
-	 * @param string $file_name
-	 *
-	 * @return string
-	 */
-	public static function getTypeFromPath($file_name){
-		$ext = strtolower(preg_replace('/^.*\.([^.]+)$/', '$1', $file_name));
-		switch( $ext ){
-			case 'jpeg':
-			case 'jpg':
-				return self::JPEG;
-				break;
-			case 'otf':
-				return self::OpenType;
-				break;
-			case 'opf':
-				return self::OPF2;
-				break;
-			case 'smil':
-				return self::MediaOverlays301;
-				break;
-			case 'js':
-				return self::JS;
-				break;
-			default:
-				$const_name = strtoupper($ext);
-				$refl = new \ReflectionClass(get_called_class());
-				return $refl->getConstant($const_name);
-				break;
-		}
-	}
-
-	/**
-	 * Return folder name
-	 *
-	 * @param string $path
-	 *
-	 * @return string
-	 */
-	public static function getDestinationFolder($path){
-		$path = (string) $path;
-		if( preg_match('/\.(jpe?g|gif|png|svg)$/i', $path) ) {
-			return 'Image';
-		}elseif( preg_match('/\.(otf|woff|ttf)$/i', $path) ) {
-			return 'Font';
-		}elseif( preg_match('/\.(css)$/i', $path) ) {
-			return 'CSS';
-		}elseif( preg_match('/\.(mp4|mp3)$/i', $path) ){
-			return 'Media';
-		}elseif( preg_match('/\.(smil|pls)$/i', $path) ){
-			return 'Speech';
-		}elseif( preg_match('/\.(js|json)$/i', $path) ){
-			return 'JS';
-		}elseif( preg_match('/\.x?html$/i', $path) ){
-			return 'Text';
-		}else{
-			return 'Misc';
-		}
-	}
-
+    /**
+     * Return folder name
+     *
+     * @param string $path
+     *
+     * @return string
+     */
+    public static function getDestinationFolder($path)
+    {
+        $path = (string) $path;
+        if (preg_match('/\.(jpe?g|gif|png|svg)$/i', $path)) {
+            return 'Image';
+        } elseif (preg_match('/\.(otf|woff|ttf)$/i', $path)) {
+            return 'Font';
+        } elseif (preg_match('/\.(css)$/i', $path)) {
+            return 'CSS';
+        } elseif (preg_match('/\.(mp4|mp3)$/i', $path)) {
+            return 'Media';
+        } elseif (preg_match('/\.(smil|pls)$/i', $path)) {
+            return 'Speech';
+        } elseif (preg_match('/\.(js|json)$/i', $path)) {
+            return 'JS';
+        } elseif (preg_match('/\.x?html$/i', $path)) {
+            return 'Text';
+        } else {
+            return 'Misc';
+        }
+    }
 }

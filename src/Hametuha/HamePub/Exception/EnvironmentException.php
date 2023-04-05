@@ -9,7 +9,5 @@ namespace Hametuha\HamePub\Exception;
  */
 class EnvironmentException extends \Exception
 {
-
-	protected $code = 500;
-
+    protected $code = 500;
 }

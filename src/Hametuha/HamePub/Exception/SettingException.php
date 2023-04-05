@@ -2,7 +2,6 @@
 
 namespace Hametuha\HamePub\Exception;
 
-
 use Exception;
 
 /**
@@ -12,7 +11,5 @@ use Exception;
  */
 class SettingException extends \Exception
 {
-
-	protected $code = 500;
-
+    protected $code = 500;
 }
