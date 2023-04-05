@@ -1,0 +1,35 @@
+#!/usr/bin/env php
+<?php
+
+if (php_sapi_name() !== 'cli') {
+    exit;
+}
+
+// The Root is 2 levels up from bin directory.
+$root_app = dirname(__DIR__);
+
+if (!is_file($root_app . '/vendor/autoload.php')) {
+	// the root is 4 levels up(vendor/hametuha/hamepub/bin) from bin directory.
+    $root_app = dirname(__DIR__, 4);
+}
+
+require $root_app . '/vendor/autoload.php';
+
+use Minicli\App;
+use Minicli\Command\CommandCall;
+
+$app = new App();
+$input = new CommandCall($argv);
+
+// Generate command.
+$app->registerCommand('generate', function( CommandCall $input ) use ($app, $root_app) {
+    $app->getPrinter()->info("Generate ePub.");
+	$file = $input->hasParam( 'file' ) ? $input->getParam( 'file' ) : $root_app . '/setting.json';
+	if(!file_exists($file)) {
+		// This is not file.
+		$app->getPrinter()->error('Setting file not found.', false);
+	}
+
+});
+
+$app->runCommand($input->getRawArgs());
