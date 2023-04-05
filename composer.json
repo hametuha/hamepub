@@ -27,6 +27,7 @@
     "require": {
         "php": "^7.2|^8",
         "ext-dom": "*",
+        "ext-json": "*",
         "masterminds/html5": "2.*",
         "minicli/minicli": "^2.2"
     },

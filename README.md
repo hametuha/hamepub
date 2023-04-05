@@ -15,61 +15,63 @@ If you maintain PHP-based web apps, HamePub will help your multi-publishing.
 Use composer.
 
 ```json
-"require": {
-  "hametuha/hamepub": "dev-master"
+composer require haemtuha/hamepub
+```
+
+## How to Use
+
+You can user HamePub for dynamic ePub generation, but suppose that you have a static HTML collection like below:
+
+```
+dist
+- index.html
+- content.html
+- colophon.html
+- css
+  - style.css
+- img
+  - cover.jpg
+  - graph.jpg
+  - barchart.png
+```
+
+Now we have CLI tool `hamepub` and you can run CLI command in your working directory.
+
+```bash
+# Dump setting file.
+./vendor/bin/hamepub init setting.json
+```
+
+Next, edit JSON file like below:
+
+```json
+{
+    "root": "./dist/",
+    "id": "my-first-ebook",
+    "isbn": "1234567890123",
+    "title": "My First Book",
+    "author": "Fumiki Takahashi",
+    "target": "./out",
+    "published": "2023-01-01T23:00:00Z",
+    "direction": "ltr",
+    "cover": "./dist/img/cover.jpg"
 }
 ```
 
-## How to USE
+Then, run command.
 
-Mmm... It's little bit hard to generate ePub... Isn't it?
-
-I can't write down everything here. Please wait for completion.
-
-```php
-// Load library
-require 'vendor/autoload.php';
-// $contents is an associative array which consists of
-// html strings of you ebook contents.
-// Start Creating
-$factory = Factory::init('my-epub', PATH_TO_TMP_DIR);
-// Create toc
-foreach( $contents as $key => $html ){
-   // Register toc
-   $page_toc = $factory->toc->addChild( $key, $key.'.xhtml');
-   // Grab all headers and add them to toc.
-   $dom = $factory->parser->html5->loadHTML($html);
-   // 3 is maximum header level, 2 means depth. 
-   $factory->parser->grabHeaders($page_toc, $dom, true, 3, 2);
-   // Now, all headers have id anchor.
-   $html = $factory->parser->convertToString($dom);
-   // Recreate DOM.
-   $dom = $factory->registerHTML( $key, $html );
-   // Grab all images
-   foreach( $factory->parser->extractAssets( $dom, 'img', 'src', '#http://example\.jp/assets#', ASSETS_DIR ) as $path ){
-   	 $factory->opf->addItem( $path, '' );
-   }
-   // Register to OPF
-   $factory->ofp->addItem( "Text/{$key}.xhtml", "{$key}.xhtml");
-   // Save HTML
-   $factory->parser->saveDom($dom, "{$key}.xhtml");
-}
-// Set OPF.
-$factory->opf->setLang( 'en_US' );
-$factory->opf->setTitle( 'My First eBook', 'main-title' );
-$factory->opf->putXML();
-$factory->container->putXML();
-// Save it!
-$factory->compile('path/to/epub');
+```
+./bendor/bin/hamepub generate 
 ```
 
-## Current Version
+You will get ePub file `my-first-ebook.epub`.
 
-- 0.4 (alpha)
+## Resources
 
-## Caution
+Below are important resources.
 
-This library is under alpha and highly experimental. Do not trust this until Beta! 
+- [ePub 3 Overview](https://www.w3.org/TR/epub-overview-33/)
+- [Mark Code List for Relators](https://www.loc.gov/marc/relators/relaterm.html) is the definition of `author` section.
 
 ## Acknowledgement
 
@@ -77,4 +79,4 @@ The sample picture is credited by [Public Domain Pictures](https://www.pexels.co
 
 ## License
 
-As wrote in LICENSE file, this library is released under [MIT](https://opensource.org/licenses/MIT).
+This library is released under [MIT](https://opensource.org/licenses/MIT).

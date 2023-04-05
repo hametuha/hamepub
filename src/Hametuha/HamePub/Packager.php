@@ -110,7 +110,7 @@ class Packager extends Singleton {
         $factory->opf->putXML();
         $factory->container->putXML();
         // Save it!
-        $target = tempnam(  $this->setting['target'], $this->setting['id'] . '-' ) . '.epub';
+        $target = rtrim( $this->setting['target'], '/' ) . $this->setting['id'] . '.epub';
         if ( ! is_writable( dirname( $target ) ) ) {
             throw new \Exception( 'Target directory is not writable: ' . $target );
         }
@@ -147,9 +147,9 @@ class Packager extends Singleton {
     /**
      * Dump setting for debugging.
      *
-     * @return void
+     * @return array
      */
     public function dumpSetting() {
-        var_dump( $this->setting, $this->htmls );
+        return  $this->defaultSetting();
     }
 }

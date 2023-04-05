@@ -38,7 +38,20 @@ $app->registerCommand('generate', function( CommandCall $input ) use ($app, $roo
     } catch ( \Exception $e ) {
         $app->getPrinter()->error($e->getMessage(), false);
     }
-
 });
+
+// Init command.
+$app->registerCommand('init', function( CommandCall $input ) use ($app, $root_app) {
+    $file = $input->hasParam( 'file' ) ? $input->getParam( 'file' ) : $root_app . '/setting.json';
+    $app->getPrinter()->info("Dump setting file: " . $file );
+    $contents = \Hametuha\HamePub\Packager::get()->dumpSetting();
+    if ( file_put_contents( $file, json_encode( $contents, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES ) ) ) {
+        $app->getPrinter()->success("Setting file written.", false);
+    } else {
+        $app->getPrinter()->error("Failed to write setting file.", false);
+    }
+
+} );
+
 
 $app->runCommand($input->getRawArgs());
