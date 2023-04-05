@@ -5,8 +5,8 @@ namespace Hametuha\HamePub\Parser;
 /**
  * Parse setting JSON file and ensure it has all required keys.
  */
-trait SettingParser {
-
+trait SettingParser
+{
     /**
      * Get setting from file.
      *
@@ -14,26 +14,27 @@ trait SettingParser {
      * @return array
      * @throws \Exception
      */
-    public function getSettingFromFile( $file_path = './setting.json' ) {
-        if ( ! file_exists( $file_path ) ) {
-            throw new \Exception( 'Setting file not found.' );
+    public function getSettingFromFile($file_path = './setting.json')
+    {
+        if (! file_exists($file_path)) {
+            throw new \Exception('Setting file not found.');
         }
-        $setting = json_decode( file_get_contents( $file_path ), true );
-        if ( ! is_array( $setting ) ) {
-            throw new \Exception( 'Setting file is not valid JSON.' );
+        $setting = json_decode(file_get_contents($file_path), true);
+        if (! is_array($setting)) {
+            throw new \Exception('Setting file is not valid JSON.');
         }
-        $setting = array_replace_recursive( $this->defaultSetting(), $setting );
+        $setting = array_replace_recursive($this->defaultSetting(), $setting);
         // Validate if isbn is not set.
-        if ( empty( $setting['id']) ) {
-            throw new \Exception( 'id fields must not be empty: ' . $setting['id'] );
+        if (empty($setting['id'])) {
+            throw new \Exception('id fields must not be empty: ' . $setting['id']);
         }
         // Validate if published is not set.
-        if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/u', $setting['published' ] ) ) {
-            throw new \Exception( 'published field is malformed. Should be GMT in ISO8601 e.g. "2000-01-01T00:00:00Z": ' . $setting['published'] );
+        if (! preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/u', $setting['published' ])) {
+            throw new \Exception('published field is malformed. Should be GMT in ISO8601 e.g. "2000-01-01T00:00:00Z": ' . $setting['published']);
         }
         // Validate if author is set.
-        if ( empty( $setting['author'] ) ) {
-            throw new \Exception( 'At least 1 author should be set.' );
+        if (empty($setting['author'])) {
+            throw new \Exception('At least 1 author should be set.');
         }
         return $setting;
     }
@@ -43,7 +44,8 @@ trait SettingParser {
      *
      * @return array
      */
-    public function defaultSetting() {
+    public function defaultSetting()
+    {
         return [
             'lang'      => 'en',
             'id'        => '',

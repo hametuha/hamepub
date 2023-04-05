@@ -80,11 +80,12 @@ class Content extends Prototype
      *
      * @return void
      */
-    public function addAuthor( $value, $id, $tag = 'creator', $role = '' ) {
-        $creator = $this->dom->metadata->addChild( $tag, $this->h( $value ), Schemas::DC );
+    public function addAuthor($value, $id, $tag = 'creator', $role = '')
+    {
+        $creator = $this->dom->metadata->addChild($tag, $this->h($value), Schemas::DC);
         $creator['id'] = $id;
-        if ( $role ) {
-            $meta = $this->dom->metadata->addChild( 'meta', $role );
+        if ($role) {
+            $meta = $this->dom->metadata->addChild('meta', $role);
             $meta['refines'] = '#' . $id;
             $meta['property'] = 'role';
             $meta['scheme'] = 'marc:relators';
@@ -99,7 +100,7 @@ class Content extends Prototype
      */
     public function setModifiedDate($timestamp)
     {
-        if ( is_int( $timestamp ) ) {
+        if (is_int($timestamp)) {
             $timestamp = date('Y-m-d\TH:i:s\Z', $timestamp);
         }
         $this->addMeta('meta', $timestamp, [

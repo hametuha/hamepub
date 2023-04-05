@@ -9,8 +9,8 @@ use PHPUnit\Framework\Error\Error;
 /**
  * Package ePub from directory.
  */
-class Packager extends Singleton {
-
+class Packager extends Singleton
+{
     use SettingParser;
 
     /**
@@ -37,84 +37,85 @@ class Packager extends Singleton {
      * @return string ePub file path.
      * @throws \Exception
      */
-    public function parse( $file = 'setting.json', $tmp_dir = '' ) {
-        $this->setting = $this->getSettingFromFile( $file );
+    public function parse($file = 'setting.json', $tmp_dir = '')
+    {
+        $this->setting = $this->getSettingFromFile($file);
         // Set temporary directory.
-        if ( empty( $tmp_dir ) ) {
-            $tmp_dir = tempnam( sys_get_temp_dir(), 'hamepub-' );
+        if (empty($tmp_dir)) {
+            $tmp_dir = tempnam(sys_get_temp_dir(), 'hamepub-');
         }
         // Load HTMLs.
         $this->loadHtml();
-        if ( empty( $this->htmls ) ) {
-            throw new \Exception( 'No HTML files found.' );
+        if (empty($this->htmls)) {
+            throw new \Exception('No HTML files found.');
         }
         // Start parsing.
-        $factory = Factory::init( $this->setting[ 'id' ], $tmp_dir );
+        $factory = Factory::init($this->setting[ 'id' ], $tmp_dir);
         // Set metadata.
-        $factory->opf->setLang( $this->setting[ 'lang' ] );
-        $factory->opf->setTitle( $this->setting[ 'title' ], 'main-title' );
-        $factory->opf->setModifiedDate( $this->setting['published'] );
+        $factory->opf->setLang($this->setting[ 'lang' ]);
+        $factory->opf->setTitle($this->setting[ 'title' ], 'main-title');
+        $factory->opf->setModifiedDate($this->setting['published']);
         $factory->opf->direction = $this->setting['direction'];
         // Set authors.
-        if ( is_array( $this->setting['author'] ) ) {
-            foreach ( $this->setting['author'] as $index => $author ) {
+        if (is_array($this->setting['author'])) {
+            foreach ($this->setting['author'] as $index => $author) {
                 $factory->opf->addAuthor(
                     $author['name'],
-                    ( $author['id'] ?? sprintf( 'creator-%d', $index + 1 ) ),
-                    ( ( isset( $author['type'] ) && $author['type'] === 'contributor' ) ? 'contributor' : 'creator'),
+                    ( $author['id'] ?? sprintf('creator-%d', $index + 1) ),
+                    ( ( isset($author['type']) && $author['type'] === 'contributor' ) ? 'contributor' : 'creator'),
                     ( $author['role'] ?? '' )
                 );
             }
         } else {
-            $factory->opf->addAuthor( $this->setting['author'], 'creator' );
+            $factory->opf->addAuthor($this->setting['author'], 'creator');
         }
-        foreach ( $this->htmls as $key => $html ) {
+        foreach ($this->htmls as $key => $html) {
             // Register toc
-            $toc = $factory->toc->addChild( $key, $key . '.xhtml' );
+            $toc = $factory->toc->addChild($key, $key . '.xhtml');
             // Grab all headers and add them to toc.
-            $dom = $factory->parser->html5->loadHTML( $html );
+            $dom = $factory->parser->html5->loadHTML($html);
             // Grab header and add ID attributes.
-            $factory->parser->grabHeaders( $toc, $dom, true, $this->setting[ 'header' ][ 'max_level' ], $this->setting[ 'header' ][ 'max_level' ] );
+            $factory->parser->grabHeaders($toc, $dom, true, $this->setting[ 'header' ][ 'max_level' ], $this->setting[ 'header' ][ 'max_level' ]);
             // Convert from dom object to string.
-            $html = $factory->parser->convertToString( $dom );
+            $html = $factory->parser->convertToString($dom);
             // Recreate DOM.
-            $dom = $factory->registerHTML( $key, $html, $this->getLinear( $key ) );
+            $dom = $factory->registerHTML($key, $html, $this->getLinear($key));
             // Grab all images
-            foreach ( $factory->parser->extractAssets( $dom, 'img', 'src', $this->setting[ 'url_base' ], $this->setting[ 'root' ] ) as $path ) {
-                $factory->opf->addItem( $path, '' );
+            foreach ($factory->parser->extractAssets($dom, 'img', 'src', $this->setting[ 'url_base' ], $this->setting[ 'root' ]) as $path) {
+                $factory->opf->addItem($path, '');
             }
             // Grab all CSS
-            foreach ( $factory->parser->extractAssets( $dom, 'link', 'href', $this->setting[ 'url_base' ], $this->setting[ 'root' ] ) as $path ) {
-                $factory->opf->addItem( $path, '' );
+            foreach ($factory->parser->extractAssets($dom, 'link', 'href', $this->setting[ 'url_base' ], $this->setting[ 'root' ]) as $path) {
+                $factory->opf->addItem($path, '');
             }
             // Register to OPF
-            $factory->opf->addItem( "Text/{$key}.xhtml", "{$key}.xhtml" );
+            $factory->opf->addItem("Text/{$key}.xhtml", "{$key}.xhtml");
             // Save HTML
-            $factory->parser->saveDom( $dom, "{$key}.xhtml" );
+            $factory->parser->saveDom($dom, "{$key}.xhtml");
         }
         // If TOC is set, save it.
-        if ( !empty($this->setting['toc']) ) {
+        if (!empty($this->setting['toc'])) {
             $factory->toc->label = $this->setting['toc'];
             $toc_html = $factory->toc->getHTML();
-            $factory->opf->addItem( 'Text/toc.xhtml', 'toc.xhtml', ['nav'] );
-            $factory->parser->saveDom( $factory->registerHTML( 'toc', $toc_html, 'no' ), 'toc.xhtml' );
+            $factory->opf->addItem('Text/toc.xhtml', 'toc.xhtml', ['nav']);
+            $factory->parser->saveDom($factory->registerHTML('toc', $toc_html, 'no'), 'toc.xhtml');
         }
         // Set OPF.
-        if ( ! empty( $this->setting[ 'isbn' ] ) ) {
-            $factory->opf->setIdentifier( $this->setting[ 'isbn' ] );
+        if (! empty($this->setting[ 'isbn' ])) {
+            $factory->opf->setIdentifier($this->setting[ 'isbn' ]);
         }
         // If cover is set, add it.
-        if ( $this->setting['cover'] ) {
-            $factory->addCover( $this->setting['cover'] );
+        if ($this->setting['cover']) {
+            $factory->addCover($this->setting['cover']);
         }
         $factory->opf->putXML();
         $factory->container->putXML();
         // Save it!
-        $target = rtrim( $this->setting['target'], '/' ) . $this->setting['id'] . '.epub';
-        if ( ! is_writable( dirname( $target ) ) ) {
-            throw new \Exception( 'Target directory is not writable: ' . $target );
+        $target = rtrim($this->setting['target'], '/') . $this->setting['id'] . '.epub';
+        if (! is_writable(dirname($target))) {
+            throw new \Exception('Target directory is not writable: ' . $target);
         }
-        $factory->compile( $target );
+        $factory->compile($target);
         return $target;
     }
 
@@ -124,21 +125,23 @@ class Packager extends Singleton {
      * @param string $key HTML name.
      * @return string
      */
-    protected function getLinear( $key ) {
-        return in_array( $key, $this->setting['hidden'], true ) ? 'no' : 'yes';
+    protected function getLinear($key)
+    {
+        return in_array($key, $this->setting['hidden'], true) ? 'no' : 'yes';
     }
 
     /**
      * Load HTML and save it in $htmls.
      * @return void
      */
-    public function loadHtml() {
-        $files = glob( $this->setting[ 'root' ] . '/*.html' );
-        foreach ( $files as $file ) {
-            $this->htmls[ basename( $file, '.html' ) ] = file_get_contents( $file );
+    public function loadHtml()
+    {
+        $files = glob($this->setting[ 'root' ] . '/*.html');
+        foreach ($files as $file) {
+            $this->htmls[ basename($file, '.html') ] = file_get_contents($file);
             // Save modified time.
-            $time = filemtime( $file );
-            if ( $time > $this->newest ) {
+            $time = filemtime($file);
+            if ($time > $this->newest) {
                 $this->newest = $time;
             }
         }
@@ -149,7 +152,8 @@ class Packager extends Singleton {
      *
      * @return array
      */
-    public function dumpSetting() {
+    public function dumpSetting()
+    {
         return  $this->defaultSetting();
     }
 }

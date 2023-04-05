@@ -85,7 +85,7 @@ class Toc
 </head>
 <body>
 HTML;
-        $html .= $this->getNavHTML( $title );
+        $html .= $this->getNavHTML($title);
         $html .= <<<HTML
 {$footer}
 </body>
