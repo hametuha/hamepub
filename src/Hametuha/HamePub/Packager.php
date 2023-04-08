@@ -90,7 +90,7 @@ class Packager extends Singleton
             }
             // Register to OPF
             $properties = [];
-            if (!empty($this->setting['properties'][$key]) ) {
+            if (!empty($this->setting['properties'][$key])) {
                 $properties = (array) $this->setting['properties'][$key];
             }
             $factory->opf->addItem("Text/{$key}.xhtml", $key . '-xhtml', $properties);
