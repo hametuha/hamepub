@@ -112,6 +112,12 @@ class Packager extends Singleton
         if ($this->setting['cover']) {
             $factory->addCover($this->setting['cover']);
         }
+        // Set guider if exists.
+        if (!empty($this->setting['guides'])) {
+            foreach ($this->setting['guides'] as $guide) {
+                $factory->opf->addGuide($guide['type'], $guide['href'], $guide['title'] ?? '');
+            }
+        }
         $factory->opf->putXML();
         $factory->container->putXML();
         // Save it!
