@@ -17,7 +17,12 @@
     "scripts": {
         "test": "phpunit",
         "lint": "phpcs --standard=phpcs.ruleset.xml $(find ./src -name '*.php')",
-        "fix": "phpcbf --standard=phpcs.ruleset.xml $(find ./src -name '*.php')"
+        "fix": "phpcbf --standard=phpcs.ruleset.xml $(find ./src -name '*.php')",
+        "compile": [
+            "rm -rf ./tests/tmp/hamepub",
+            "mkdir -p ./tests/tmp/hamepub",
+            "./bin/hamepub generate tmp=tests/tmp/hamepub"
+        ]
 
     },
     "bin": [

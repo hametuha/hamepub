@@ -89,7 +89,11 @@ class Packager extends Singleton
                 $factory->opf->addItem($path, '');
             }
             // Register to OPF
-            $factory->opf->addItem("Text/{$key}.xhtml", "{$key}.xhtml");
+            $properties = [];
+            if (!empty($this->setting['properties'][$key]) ) {
+                $properties = (array) $this->setting['properties'][$key];
+            }
+            $factory->opf->addItem("Text/{$key}.xhtml", $key . '-xhtml', $properties);
             // Save HTML
             $factory->parser->saveDom($dom, "{$key}.xhtml");
         }
@@ -97,8 +101,8 @@ class Packager extends Singleton
         if (!empty($this->setting['toc'])) {
             $factory->toc->label = $this->setting['toc'];
             $toc_html = $factory->toc->getHTML();
-            $factory->opf->addItem('Text/toc.xhtml', 'toc.xhtml', ['nav']);
-            $factory->parser->saveDom($factory->registerHTML('toc', $toc_html, 'no'), 'toc.xhtml');
+            $factory->opf->addItem('Text/toc.xhtml', 'text-toc-xhtml', ['nav']);
+            $factory->parser->saveDom($factory->registerHTML('text-toc', $toc_html, 'no'), 'toc.xhtml');
         }
         // Set OPF.
         if (! empty($this->setting[ 'isbn' ])) {
@@ -111,7 +115,7 @@ class Packager extends Singleton
         $factory->opf->putXML();
         $factory->container->putXML();
         // Save it!
-        $target = rtrim($this->setting['target'], '/') . $this->setting['id'] . '.epub';
+        $target = rtrim($this->setting['target'], '/') . '/' . $this->setting['id'] . '.epub';
         if (! is_writable(dirname($target))) {
             throw new \Exception('Target directory is not writable: ' . $target);
         }

@@ -166,12 +166,12 @@ class Content extends Prototype
      * @param string $liner
      * @param array $properties List of property. 'page-spread-left' or 'page-spread-right' is allowed.
      *
-     * @return mixed
+     * @return \SimpleXMLElement
      */
     public function addIdref($id, $liner = 'yes', array $properties = [])
     {
         $itemref = $this->dom->spine->addChild('itemref');
-        $itemref['idref'] = $id;
+        $itemref['idref'] = $this->pathToId($id);
         if ('no' === $liner) {
             $itemref['linear'] = 'no';
         }
