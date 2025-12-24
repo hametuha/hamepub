@@ -3,3 +3,4 @@ tests/tmp/*
 composer.lock
 *.cache
 setting.json
+.claude/settings.local.json
