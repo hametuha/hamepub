@@ -1,0 +1,23 @@
+name: Publish Release
+
+on:
+  release:
+    types: [ published ]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Publish to Packagist
+    environment:
+      name: production
+      url: https://packagist.org/packages/hametuha/hamepub
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Release published
+        run: |
+          echo "Release ${{ github.event.release.tag_name }} published"
+          echo "Packagist will auto-update via webhook"

@@ -49,4 +49,47 @@ class ContentTest extends Hametuha\HamePub\Test
 		$this->assertFileExists($out);
 		$this->assertXmlFileEqualsXmlFile($this->asset_dir.DIRECTORY_SEPARATOR.'content-meta-only.opf', $out);
 	}
+
+	/**
+	 * Test addIdref uses id directly without pathToId conversion
+	 *
+	 * @see https://github.com/hametuha/hamepub/issues/7
+	 */
+	public function testAddIdrefUsesIdDirectly() {
+		// Add item with custom id
+		$customId = 'my-custom-id';
+		$this->content->addItem('Text/chapter1.xhtml', $customId);
+
+		// Add idref with the same custom id
+		$this->content->addIdref($customId);
+
+		// Get the XML output
+		$out = $this->content->putXML();
+		$xml = simplexml_load_file($out);
+
+		// Check that the spine contains the correct idref
+		$spine = $xml->spine;
+		$this->assertCount(1, $spine->itemref);
+		$this->assertEquals($customId, (string) $spine->itemref[0]['idref']);
+
+		// Verify manifest item has the same id
+		$manifest = $xml->manifest;
+		$foundItem = false;
+		foreach ($manifest->item as $item) {
+			if ((string) $item['id'] === $customId) {
+				$foundItem = true;
+				break;
+			}
+		}
+		$this->assertTrue($foundItem, 'Manifest should contain item with custom id');
+	}
+
+	/**
+	 * Test pathToId conversion
+	 */
+	public function testPathToId() {
+		$this->assertEquals('text-chapter1-xhtml', $this->content->pathToId('Text/chapter1.xhtml'));
+		$this->assertEquals('chapter1-xhtml', $this->content->pathToId('chapter1.xhtml'));
+		$this->assertEquals('images-cover-jpg', $this->content->pathToId('Images/cover.jpg'));
+	}
 }

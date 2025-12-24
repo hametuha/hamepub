@@ -33,7 +33,7 @@ class Factory extends AbstractFactory
         $dom = $this->parser->parseFromString($html);
         if ($dom) {
             if (!isset($this->doms[$id])) {
-                $this->opf->addIdref($id . '.xhtml', $linear, $properties);
+                $this->opf->addIdref($this->opf->pathToId($id . '.xhtml'), $linear, $properties);
             }
             $this->doms[$id] = $dom;
             return $dom;

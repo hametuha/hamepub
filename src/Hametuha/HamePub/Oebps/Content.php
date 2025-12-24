@@ -171,7 +171,7 @@ class Content extends Prototype
     public function addIdref($id, $liner = 'yes', array $properties = [])
     {
         $itemref = $this->dom->spine->addChild('itemref');
-        $itemref['idref'] = $this->pathToId($id);
+        $itemref['idref'] = $id;
         if ('no' === $liner) {
             $itemref['linear'] = 'no';
         }
