@@ -434,7 +434,6 @@ HTML;
             'info' => curl_getinfo($ch),
             'body' => $result,
         ];
-        curl_close($ch);
         return $return;
     }
 
