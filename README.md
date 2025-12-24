@@ -2,7 +2,7 @@ HamePub
 =======
 
 
-[![GitHub actions for HamePub](https://github.com/hametuha/hamepub/actions/workflows/hamepub.yml/badge.svg)](https://github.com/hametuha/hamepub/actions)
+[![GitHub actions for HamePub](https://github.com/hametuha/hamepub/actions/workflows/test.yml/badge.svg)](https://github.com/hametuha/hamepub/actions)
 
 HemePub's living example is [hametuha](http://hametuha.com).
 It's a WordPress site which is able to publish it's contents to ePub.
@@ -89,6 +89,7 @@ Next, edit JSON file like below:
 | `header.max_level` | No | Maximum header level to include in TOC. Default: `3` |
 | `header.depth` | No | Header depth. Default: `2` |
 | `hidden` | No | Array of HTML file names (without extension) to hide from spine. Default: `["toc"]` |
+| `url_base` | No | Regex pattern for URL replacement in assets. Default: `#\./#u` |
 | `guides` | No | Array of guide objects with `type`, `href`, and optional `title`. |
 | `properties` | No | Object mapping HTML file names to arrays of properties. |
 
@@ -100,6 +101,9 @@ Then, run command.
 
 # Or specify a custom setting file.
 ./vendor/bin/hamepub generate file=my-setting.json
+
+# Specify a custom temporary directory.
+./vendor/bin/hamepub generate tmp=./my-tmp-dir/
 ```
 
 You will get ePub file `my-first-ebook.epub`.
